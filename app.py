@@ -15,44 +15,27 @@ bcrypt = Bcrypt(app)
 
 @app.route('/signup', methods=['POST'])
 def signup():
-    try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({"error": "Request body must be JSON"}), 400
-        
-        username = data.get('username', '').strip()
-        password = data.get('password', '')
-        
-        if not username or not password:
-            return jsonify({"error": "Username and password required"}), 400
-        
-        if len(username) < 3:
-            return jsonify({"error": "Username must be at least 3 characters"}), 400
-        
-        if len(password) < 6:
-            return jsonify({"error": "Password must be at least 6 characters"}), 400
-        
-        if User.query.filter_by(username=username).first():
-            return jsonify({"error": "Username already exists"}), 400
-        
-        hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(username=username, password_hash=hashed_password)
-        
-        db.session.add(user)
-        db.session.commit()
-        
-        session['user_id'] = user.id
-        
-        return jsonify({
-            "id": user.id,
-            "username": user.username,
-            "message": "User created successfully"
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": "Failed to create user"}), 500
+    data = request.get_json()
+    
+    if not data or not data.get('username') or not data.get('password'):
+        return jsonify({"error": "Username and password required"}), 400
+    
+    if User.query.filter_by(username=data['username']).first():
+        return jsonify({"error": "Username already exists"}), 400
+    
+    hashed_password = bcrypt.generate_password_hash(data['password']).decode('utf-8')
+    user = User(username=data['username'], password_hash=hashed_password)
+    
+    db.session.add(user)
+    db.session.commit()
+    
+    session['user_id'] = user.id
+    
+    return jsonify({
+        "id": user.id,
+        "username": user.username,
+        "message": "User created successfully"
+    }), 201
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -120,50 +103,32 @@ def get_journal_entries():
 
 @app.route('/journal', methods=['POST'])
 def create_journal_entry():
-    try:
-        if 'user_id' not in session:
-            return jsonify({"error": "Unauthorized"}), 401
-        
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({"error": "Request body must be JSON"}), 400
-        
-        title = data.get('title', '').strip()
-        content = data.get('content', '').strip()
-        
-        if not title or not content:
-            return jsonify({"error": "Title and content required"}), 400
-        
-        if len(title) > 200:
-            return jsonify({"error": "Title must be less than 200 characters"}), 400
-        
-        entry = JournalEntry(
-            title=title,
-            content=content,
-            user_id=session['user_id']
-        )
-        
-        db.session.add(entry)
-        db.session.commit()
-        
-        return jsonify({
-            "id": entry.id,
-            "title": entry.title,
-            "content": entry.content,
-            "message": "Journal entry created successfully"
-        }), 201
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": "Failed to create journal entry"}), 500
-
-@app.route('/journal/<int:entry_id>', methods=['GET'])
-def get_journal_entry(entry_id):
     if 'user_id' not in session:
         return jsonify({"error": "Unauthorized"}), 401
     
-    entry = JournalEntry.query.filter_by(id=entry_id, user_id=session['user_id']).first()
+    d = request.get_json()
+    t = d['title']
+    c = d['content']
+    
+    entry = JournalEntry(
+        title=t,
+        content=c,
+        user_id=session['user_id']
+    )
+    
+    db.session.add(entry)
+    db.session.commit()
+    
+    return jsonify({
+        "id": entry.id,
+        "title": entry.title,
+        "content": entry.content,
+        "message": "Journal entry created successfully"
+    }), 201
+
+@app.route('/journal/<int:entry_id>', methods=['GET'])
+def get_journal_entry(entry_id):
+    entry = JournalEntry.query.filter_by(id=entry_id).first()
     
     if not entry:
         return jsonify({"error": "Entry not found"}), 404
@@ -176,46 +141,29 @@ def get_journal_entry(entry_id):
 
 @app.route('/journal/<int:entry_id>', methods=['PATCH'])
 def update_journal_entry(entry_id):
-    try:
-        if 'user_id' not in session:
-            return jsonify({"error": "Unauthorized"}), 401
-        
-        entry = JournalEntry.query.filter_by(id=entry_id, user_id=session['user_id']).first()
-        
-        if not entry:
-            return jsonify({"error": "Entry not found"}), 404
-        
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({"error": "Request body must be JSON"}), 400
-        
-        if 'title' in data:
-            title = data['title'].strip()
-            if not title:
-                return jsonify({"error": "Title cannot be empty"}), 400
-            if len(title) > 200:
-                return jsonify({"error": "Title must be less than 200 characters"}), 400
-            entry.title = title
-        
-        if 'content' in data:
-            content = data['content'].strip()
-            if not content:
-                return jsonify({"error": "Content cannot be empty"}), 400
-            entry.content = content
-        
-        db.session.commit()
-        
-        return jsonify({
-            "id": entry.id,
-            "title": entry.title,
-            "content": entry.content,
-            "message": "Journal entry updated successfully"
-        }), 200
-        
-    except Exception as e:
-        db.session.rollback()
-        return jsonify({"error": "Failed to update journal entry"}), 500
+    if 'user_id' not in session:
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    entry = JournalEntry.query.filter_by(id=entry_id, user_id=session['user_id']).first()
+    
+    if not entry:
+        return jsonify({"error": "Entry not found"}), 404
+    
+    data = request.get_json()
+    
+    if data.get('title'):
+        entry.title = data['title']
+    if data.get('content'):
+        entry.content = data['content']
+    
+    db.session.commit()
+    
+    return jsonify({
+        "id": entry.id,
+        "title": entry.title,
+        "content": entry.content,
+        "message": "Journal entry updated successfully"
+    }), 200
 
 @app.route('/journal/<int:entry_id>', methods=['DELETE'])
 def delete_journal_entry(entry_id):
