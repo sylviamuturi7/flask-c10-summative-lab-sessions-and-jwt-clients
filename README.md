@@ -17,7 +17,7 @@ like 5 times to get it right.
 
 ## How to Get This Running
 
-1. **Clone this repo** (if you haven't alrea:
+1. **Clone this repo**:
    ```bash
    git clone <repository-url>
    cd flask-c10-summative-lab-sessions-and-jwt-clients
