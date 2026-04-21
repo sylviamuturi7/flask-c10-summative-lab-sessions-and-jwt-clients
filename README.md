@@ -4,12 +4,12 @@ This was my first big Flask project! I decided to go with session-based authenti
 instead of JWT because it seemed easier to manage user state. Took me forever 
 to figure out how to properly hash passwords with Flask-Bcrypt lol.
 
-## What This Thing Does
+## What This Does
 
 It's basically a digital journal app where users can:
-- Sign up and log in securely (passwords are hashed!)
+- Sign up and log in securely 
 - Create, read, update, and delete their own journal entries
-- Only see their own stuff (no peeking at other people's journals)
+- Only see their own stuff 
 
 I used Flask-SQLAlchemy for the database and tried to keep things simple 
 but functional. The pagination part was tricky - had to read the docs 
@@ -28,7 +28,7 @@ like 5 times to get it right.
    pip install -r requirements.txt
    ```
    
-   **Note:** Make sure you're using Python 3.7+ or you'll get weird errors.
+   i used Python 3.7+ 
 
 3. **Set up the database**:
    ```bash
@@ -65,7 +65,7 @@ The API will be running at `http://localhost:5000`
 | DELETE | /logout | Log out (clears session) |
 
 **Quick tip:** The signup route was tricky - make sure you send JSON 
-or it will break! I learned that the hard way.
+or it will break
 
 ### Journal Entry Routes
 
@@ -95,6 +95,4 @@ I made some test users so you don't have to create accounts every time:
 Just run `python seed.py` to add them to your database. The database 
 starts empty otherwise, which is annoying for testing.
 
-**Fun fact:** I used simple passwords because I kept forgetting 
-the test ones while debugging. Don't judge lol.
 
