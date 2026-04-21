@@ -1,8 +1,7 @@
 # My Journal API
 
 This was my first big Flask project! I decided to go with session-based authentication 
-instead of JWT because it seemed easier to manage user state. Took me forever 
-to figure out how to properly hash passwords with Flask-Bcrypt lol.
+instead of JWT because it seemed easier to manage user state. 
 
 ## What This Does
 
@@ -12,8 +11,7 @@ It's basically a digital journal app where users can:
 - Only see their own stuff 
 
 I used Flask-SQLAlchemy for the database and tried to keep things simple 
-but functional. The pagination part was tricky - had to read the docs 
-like 5 times to get it right.
+but functional. The pagination part was tricky.
 
 ## How to Get This Running
 
@@ -62,9 +60,8 @@ The API will be running at `http://localhost:5000`
 | POST | /signup | Make a new user account |
 | POST | /login | Log into your account  |
 | GET | /check_session | See if you're still logged in |
-| DELETE | /logout | Log out (clears session) |
-
-**Quick tip:** The signup route was tricky - make sure you send JSON 
+| DELETE | /logout | Log out (clears session) 
+ The signup route was tricky - make sure you send JSON 
 or it will break
 
 ### Journal Entry Routes
@@ -79,7 +76,6 @@ or it will break
 
 **Warning:** The GET /journal/<id> route has a bug I haven't fixed yet - 
 it doesn't check if the entry belongs to the logged-in user. 
-Whoops!
 
 
 ## Test Users I Created
@@ -93,6 +89,6 @@ I made some test users so you don't have to create accounts every time:
 | charlie | password789 |
 
 Just run `python seed.py` to add them to your database. The database 
-starts empty otherwise, which is annoying for testing.
+starts empty otherwise.
 
 
